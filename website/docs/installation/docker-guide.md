@@ -19,7 +19,7 @@ Ygégé est disponible sous forme d'image Docker officielle multi-architecture. 
 ```bash
 docker run -d \
   --name ygege \
-  -p 8715:8715 \
+  -p 9876:9876 \
   -v ./config:/config \
   -e YGG_USERNAME="votre_nom_utilisateur" \
   -e YGG_PASSWORD="votre_mot_de_passe" \
@@ -37,7 +37,7 @@ services:
     container_name: ygege
     restart: unless-stopped
     ports:
-      - "8715:8715"
+      - "9876:9876"
     volumes:
       - ygege_sessions:/app/sessions           # Volume nommé (recommandé)
     environment:
@@ -45,7 +45,7 @@ services:
       YGG_PASSWORD: "votre_mot_de_passe"
       LOG_LEVEL: "debug"
     healthcheck:
-      test: ["CMD-SHELL", "curl --fail http://localhost:$${BIND_PORT:-8715}/health || exit 1"]
+      test: ["CMD-SHELL", "curl --fail http://localhost:$${BIND_PORT:-9876}/health || exit 1"]
       interval: 1m30s
       timeout: 20s
       retries: 3
@@ -73,7 +73,7 @@ Créez un fichier `config/config.json`:
     "username": "votre_nom_utilisateur_ygg",
     "password": "votre_mot_de_passe",
     "bind_ip": "0.0.0.0",
-    "bind_port": 8715,
+    "bind_port": 9876,
     "log_level": "debug"
 }
 ```
@@ -87,7 +87,7 @@ Les variables suivantes sont supportées:
 | `YGG_USERNAME` | Nom d'utilisateur YGG | - |
 | `YGG_PASSWORD` | Mot de passe YGG | - |
 | `BIND_IP` | Adresse IP d'écoute | `0.0.0.0` |
-| `BIND_PORT` | Port d'écoute | `8715` |
+| `BIND_PORT` | Port d'écoute | `9876` |
 | `LOG_LEVEL` | Niveau de log (trace, debug, info, warn, error) | `info` |
 | `TMDB_TOKEN` | Token API TMDB (optionnel) | - |
 | `YGG_DOMAIN` | Domaine YGG personnalisé (optionnel) | - |
@@ -119,7 +119,7 @@ services:
 Une fois le conteneur démarré, vérifiez qu'il fonctionne:
 
 ```bash
-curl http://localhost:8715/health
+curl http://localhost:9876/health
 ```
 
 Vous devriez recevoir une réponse `OK`.
@@ -179,7 +179,7 @@ Si vous souhaitez exécuter le conteneur avec un UID/GID spécifique (par exempl
 docker run -d \
   --name ygege \
   --user 1000:1000 \
-  -p 8715:8715 \
+  -p 9876:9876 \
   -v ./config:/app/sessions \
   -v ./config.json:/app/config.json \
   uwucode/ygege:latest
@@ -215,7 +215,7 @@ Si vous devez absolument exécuter le conteneur en root:
 docker run -d \
   --name ygege \
   --user 0:0 \
-  -p 8715:8715 \
+  -p 9876:9876 \
   -v ./ygege/sessions:/app/sessions \
   -e YGG_USERNAME="votre_nom" \
   -e YGG_PASSWORD="votre_mdp" \
@@ -236,7 +236,7 @@ services:
     volumes:
       - ./ygege/sessions:/app/sessions
     ports:
-      - "8715:8715"
+      - "9876:9876"
 ```
 
 Avec cette configuration, vous n'aurez plus de problèmes de permissions, mais vous perdez les avantages de sécurité du mode non-root.

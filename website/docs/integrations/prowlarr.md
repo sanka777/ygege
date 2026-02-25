@@ -11,6 +11,7 @@ Ygégé peut être utilisé comme indexeur personnalisé pour Prowlarr, permetta
 - Prowlarr installé et fonctionnel
 - Ygégé démarré et accessible
 - Le fichier `ygege.yml` du dépôt GitHub
+- Si `ANTI_BOT_PROVIDER=flaresolverr` (mode par défaut), un service Flaresolverr accessible (`http://flaresolverr:8191` en Docker Compose)
 
 ## Installation
 
@@ -90,15 +91,15 @@ systemctl restart prowlarr
 |-----------|--------|-------------|
 | **Name** | Ygégé | Nom de l'indexeur |
 | **Enable** | ✅ | Activer l'indexeur |
-| **URL** | `http://localhost:8715/` | URL de base |
+| **URL** | `http://localhost:9876/` | URL de base |
 | **API Path** | `/api` | Chemin de l'API |
 | **Categories** | Toutes | Catégories à indexer |
 
 :::warning URL de base importante
 Prowlarr ne permet **pas** de personnaliser l'URL de base. Utilisez:
-- **Installation locale**: `http://localhost:8715/`
-- **Docker Compose**: `http://ygege:8715/` (nom du service)
-- **DNS personnalisé**: `http://ygege-dns-redirect.local:8715/`
+- **Installation locale**: `http://localhost:9876/`
+- **Docker Compose**: `http://ygege:9876/` (nom du service)
+- **DNS personnalisé**: `http://ygege-dns-redirect.local:9876/`
 :::
 
 ### 3. Configuration Docker Compose
@@ -117,8 +118,13 @@ services:
     container_name: ygege
     # ... configuration ygege
 
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    # ... configuration flaresolverr
+
 # Ils sont automatiquement sur le même réseau
-# Utilisez http://ygege:8715/ dans Prowlarr
+# Utilisez http://ygege:9876/ dans Prowlarr
 ```
 
 ### 4. Tester la connexion
@@ -162,15 +168,16 @@ Ygégé supporte toutes les catégories YGG:
 
 ### Erreur de connexion
 
-1. Vérifiez que Ygégé est démarré: `curl http://localhost:8715/health`
+1. Vérifiez que Ygégé est démarré: `curl http://localhost:9876/health`
 2. Vérifiez l'URL configurée dans Prowlarr
 3. Pour Docker, vérifiez que les conteneurs sont sur le même réseau
+4. Si Flaresolverr est activé, vérifiez sa disponibilité: `curl http://flaresolverr:8191/`
 
 ### Pas de résultats
 
 1. Vérifiez les logs d'Ygégé: `docker logs ygege`
 2. Vérifiez que vos identifiants YGG sont valides
-3. Testez directement l'API: `curl http://localhost:8715/api/search?q=test`
+3. Testez directement l'API: `curl http://localhost:9876/api/search?q=test`
 
 ## Prochaines étapes
 

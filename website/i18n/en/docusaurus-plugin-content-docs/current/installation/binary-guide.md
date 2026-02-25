@@ -68,7 +68,7 @@ Create a `config.json` file in the same folder as the binary:
   "username": "your_ygg_username",
   "password": "your_password",
   "bind_ip": "0.0.0.0",
-  "bind_port": 8715,
+  "bind_port": 9876,
   "log_level": "debug",
   "tmdb_token": null
 }
@@ -85,7 +85,7 @@ You can also use environment variables:
 ```bash
 export YGG_USERNAME="your_username"
 export YGG_PASSWORD="your_password"
-export BIND_PORT="8715"
+export BIND_PORT="9876"
 export LOG_LEVEL="debug"
 ```
 
@@ -101,7 +101,7 @@ export LOG_LEVEL="debug"
 .\ygege.exe
 ```
 
-The server starts on `http://localhost:8715`
+The server starts on `http://localhost:9876`
 
 ### Background launch (Linux/macOS)
 
@@ -189,7 +189,7 @@ echo "Update completed to $LATEST"
 Test that the service is working:
 
 ```bash
-curl http://localhost:8715/health
+curl http://localhost:9876/health
 ```
 
 Expected response:
@@ -199,7 +199,7 @@ OK
 
 For detailed status:
 ```bash
-curl http://localhost:8715/status
+curl http://localhost:9876/status
 ```
 
 Response:

@@ -54,7 +54,7 @@ Oui, vous avez deux options :
 
 Voir le [guide de compilation](https://github.com/UwUDev/ygege#building-from-source) pour plus de détails.
 
-### Le port 8715 est-il obligatoire ?
+### Le port 9876 est-il obligatoire ?
 
 Non, vous pouvez utiliser n'importe quel port libre. Modifiez simplement :
 
@@ -158,7 +158,7 @@ Ygégé optimise les requêtes et respecte les bonnes pratiques :
 4. Réduisez la fréquence des recherches automatisées
 5. Redémarrez Ygégé
 
-### "Connection refused" sur localhost:8715
+### "Connection refused" sur localhost:9876
 
 **Causes possibles** :
 1. Ygégé n'est pas démarré
@@ -169,15 +169,15 @@ Ygégé optimise les requêtes et respecte les bonnes pratiques :
 ```bash
 docker ps | grep ygege        # Vérifier que le conteneur tourne
 docker logs ygege             # Voir les erreurs
-curl http://localhost:8715/health  # Tester l'API
+curl http://localhost:9876/health  # Tester l'API
 ```
 
 ### Aucun résultat dans Prowlarr/Jackett
 
 **Checklist** :
-- [ ] Ygégé est démarré : `curl http://localhost:8715/health`
+- [ ] Ygégé est démarré : `curl http://localhost:9876/health`
 - [ ] Identifiants YGG configurés
-- [ ] URL correcte dans Prowlarr/Jackett (`http://localhost:8715/` ou `http://ygege:8715/`)
+- [ ] URL correcte dans Prowlarr/Jackett (`http://localhost:9876/` ou `http://ygege:9876/`)
 - [ ] Fichier `ygege.yml` à jour
 - [ ] Prowlarr/Jackett redémarré après ajout du fichier
 

@@ -64,7 +64,7 @@ fn load_config_from_env() -> Result<Config, std::io::Error> {
     let bind_ip = std::env::var("BIND_IP").unwrap_or("0.0.0.0".to_string());
 
     let bind_port = std::env::var("BIND_PORT")
-        .unwrap_or("8715".to_string())
+        .unwrap_or("9876".to_string())
         .parse::<u16>()
         .map_err(|_| {
             std::io::Error::new(
@@ -138,7 +138,7 @@ impl Default for Config {
             username: "your_ygg_username".to_string(),
             password: "your_ygg_password".to_string(),
             bind_ip: "0.0.0.0".to_string(),
-            bind_port: 8715,
+            bind_port: 9876,
             log_level: LevelFilter::Debug,
             tmdb_token: None,
             ygg_domain: None,

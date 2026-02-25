@@ -14,6 +14,37 @@ use wreq_util::{Emulation, EmulationOS, EmulationOption};
 
 pub static KEY: OnceLock<String> = OnceLock::new();
 
+#[derive(Debug)]
+pub enum LoginError {
+    AntibotUnavailable,
+    ChallengeNotSolved,
+    InvalidCredentials,
+}
+
+impl fmt::Display for LoginError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LoginError::AntibotUnavailable => write!(f, "Anti-bot unavailable"),
+            LoginError::ChallengeNotSolved => {
+                write!(f, "Challenge not solved: missing ygg_ cookie")
+            }
+            LoginError::InvalidCredentials => write!(f, "Invalid username or password"),
+        }
+    }
+}
+
+impl Error for LoginError {}
+
+#[derive(Debug, Clone, Copy)]
+pub enum AuthProvider {
+    Native,
+}
+
+#[derive(Clone)]
+pub struct AntibotContext {
+    headers: HeaderMap,
+}
+
 pub async fn login(
     username: &str,
     password: &str,
@@ -127,7 +158,7 @@ pub async fn login(
     if !response.status().is_success() {
         if response.status() == 401 {
             error!("Invalid username or password");
-            return Err("Invalid username or password".into());
+            return Err(Box::new(LoginError::InvalidCredentials));
         }
         return Err(format!("Failed to login: {}", response.status()).into());
     }
@@ -166,7 +197,7 @@ async fn save_session(username: &str, client: &Client) -> Result<(), Box<dyn std
     Ok(())
 }
 
-pub fn add_bypass_headers(headers: &mut HeaderMap) {
+fn add_native_bypass_headers(headers: &mut HeaderMap) {
     let own_ip_lock = crate::domain::OWN_IP.get();
     if let Some(own_ip) = own_ip_lock {
         headers.insert("CF-Connecting-IP", own_ip.parse().unwrap());
