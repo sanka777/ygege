@@ -11,6 +11,7 @@ Ygégé can be used as a custom indexer for Prowlarr, allowing you to integrate 
 - Prowlarr installed and running
 - Ygégé started and accessible
 - The `ygege.yml` file from the GitHub repository
+- If `ANTI_BOT_PROVIDER=flaresolverr` (default mode), a reachable Flaresolverr service (`http://flaresolverr:8191` in Docker Compose)
 
 ## Installation
 
@@ -165,6 +166,7 @@ Ygégé supports all YGG categories:
 1. Verify that Ygégé is running: `curl http://localhost:9876/health`
 2. Check the URL configured in Prowlarr
 3. For Docker, verify containers are on the same network
+4. If Flaresolverr is enabled, verify it is reachable: `curl http://flaresolverr:8191/`
 
 ### No Results
 

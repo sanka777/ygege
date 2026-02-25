@@ -11,6 +11,7 @@ Ygégé can be used as a custom indexer for Jackett via the Cardigann system.
 - Jackett installed and running
 - Ygégé started and accessible
 - The `ygege.yml` file from the GitHub repository
+- If `ANTI_BOT_PROVIDER=flaresolverr` (default mode), a reachable Flaresolverr service (`http://flaresolverr:8191` in Docker Compose)
 
 ## Installation
 
@@ -205,6 +206,7 @@ tt0903747
    ```
 2. Check the configured URL (localhost vs container name)
 3. For Docker, verify containers are on the same network
+4. If Flaresolverr is enabled, verify it is reachable: `curl http://flaresolverr:8191/`
 
 ### No Search Results
 

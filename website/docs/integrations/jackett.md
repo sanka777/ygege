@@ -11,6 +11,7 @@ Ygégé peut être utilisé comme indexeur personnalisé pour Jackett via le sys
 - Jackett installé et fonctionnel
 - Ygégé démarré et accessible
 - Le fichier `ygege.yml` du dépôt GitHub
+- Si `ANTI_BOT_PROVIDER=flaresolverr` (mode par défaut), un service Flaresolverr accessible (`http://flaresolverr:8191` en Docker Compose)
 
 ## Installation
 
@@ -205,6 +206,7 @@ tt0903747
    ```
 2. Vérifiez l'URL configurée (localhost vs nom du conteneur)
 3. Pour Docker, vérifiez que les conteneurs sont sur le même réseau
+4. Si Flaresolverr est activé, vérifiez sa disponibilité: `curl http://flaresolverr:8191/`
 
 ### Pas de résultats de recherche
 

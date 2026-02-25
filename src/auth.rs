@@ -1,6 +1,8 @@
 use crate::domain::get_leaked_ip;
 use crate::resolver::AsyncDNSResolverAdapter;
 use crate::{DOMAIN, LOGIN_PAGE, LOGIN_PROCESS_PAGE};
+use std::error::Error;
+use std::fmt;
 use std::fs::File;
 use std::io::Write;
 use std::net::{IpAddr, SocketAddr};
@@ -11,6 +13,37 @@ use wreq::{Client, Url};
 use wreq_util::{Emulation, EmulationOS, EmulationOption};
 
 pub static KEY: OnceLock<String> = OnceLock::new();
+
+#[derive(Debug)]
+pub enum LoginError {
+    AntibotUnavailable,
+    ChallengeNotSolved,
+    InvalidCredentials,
+}
+
+impl fmt::Display for LoginError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            LoginError::AntibotUnavailable => write!(f, "Anti-bot unavailable"),
+            LoginError::ChallengeNotSolved => {
+                write!(f, "Challenge not solved: missing ygg_ cookie")
+            }
+            LoginError::InvalidCredentials => write!(f, "Invalid username or password"),
+        }
+    }
+}
+
+impl Error for LoginError {}
+
+#[derive(Debug, Clone, Copy)]
+pub enum AuthProvider {
+    Native,
+}
+
+#[derive(Clone)]
+pub struct AntibotContext {
+    headers: HeaderMap,
+}
 
 pub async fn login(
     username: &str,
@@ -47,8 +80,7 @@ pub async fn login(
         )
         .build()?;
 
-    let mut headers = HeaderMap::new();
-    add_bypass_headers(&mut headers);
+    let provider = AuthProvider::Native;
 
     let start = std::time::Instant::now();
 
@@ -87,7 +119,7 @@ pub async fn login(
         // check if the session is still valid
         let response = client
             .get(format!("https://{domain}/"))
-            .headers(headers.clone())
+            .headers(HeaderMap::new())
             .send()
             .await?;
         if response.status().is_success() {
@@ -110,54 +142,78 @@ pub async fn login(
 
     client.clear_cookies();
 
-    // inject account_created=true cookie (cookie magique)
-    let cookie = wreq::cookie::CookieBuilder::new("account_created", "true")
-        .domain(domain)
-        .path("/")
-        .http_only(true)
-        .secure(true)
-        .build();
+    let context = prepare_antibot_context(&client, domain, provider).await?;
+    perform_login_with_context(&client, domain, username, password, &context).await?;
 
-    let url = Url::parse(format!("https://{domain}/").as_str())?;
-    client.set_cookie(&url, cookie);
+    let stop = std::time::Instant::now();
+    debug!("Logged in successfully in {:?}", stop.duration_since(start));
 
-    // make a request to the login page
-    let response = client
-        //.get(format!("https://rp.lila.ws:8749/api/all"))
-        .get(format!("https://{domain}{LOGIN_PAGE}"))
-        .headers(headers.clone())
-        .send()
-        .await?;
-
-    /*println!("Body: {}", response.text().await?);
-    panic!();*/
-
-    if !response.status().is_success() {
-        return Err(format!("Failed to fetch login page: {}", response.status()).into());
+    if use_sessions {
+        save_session(username, &client).await?;
     }
-    let _headers = response.headers(); // digest the headers to get the cookies
 
-    // detect if the ygg_ cookie is set
-    let cookies = response.cookies();
-    let mut has_ygg_cookie = false;
-    for cookie in cookies {
-        if cookie.name() == "ygg_" {
-            has_ygg_cookie = true;
-            break;
+    Ok(client)
+}
+
+pub async fn prepare_antibot_context(
+    client: &Client,
+    domain: &str,
+    provider: AuthProvider,
+) -> Result<AntibotContext, Box<dyn std::error::Error>> {
+    let mut headers = HeaderMap::new();
+
+    match provider {
+        AuthProvider::Native => {
+            add_native_bypass_headers(&mut headers);
+
+            let url = Url::parse(format!("https://{domain}/").as_str())?;
+            let cookie = wreq::cookie::CookieBuilder::new("account_created", "true")
+                .domain(domain)
+                .path("/")
+                .http_only(true)
+                .secure(true)
+                .build();
+            client.set_cookie(&url, cookie);
+
+            let response = client
+                .get(format!("https://{domain}{LOGIN_PAGE}"))
+                .headers(headers.clone())
+                .send()
+                .await?;
+
+            if !response.status().is_success() {
+                return Err(Box::new(LoginError::AntibotUnavailable));
+            }
+            let _headers = response.headers();
         }
     }
 
+    Ok(AntibotContext { headers })
+}
+
+pub async fn perform_login_with_context(
+    client: &Client,
+    domain: &str,
+    username: &str,
+    password: &str,
+    context: &AntibotContext,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let url = Url::parse(format!("https://{domain}/").as_str())?;
+    let cookie_header = client
+        .get_cookies(&url)
+        .and_then(|h| h.to_str().ok().map(|value| value.to_string()));
+    let has_ygg_cookie = cookie_header
+        .as_deref()
+        .is_some_and(|cookies| cookies.contains("ygg_="));
     if !has_ygg_cookie {
-        return Err("No ygg_ cookie found".into());
+        return Err(Box::new(LoginError::ChallengeNotSolved));
     }
 
-    // multipart/form-data
     let payload = [("id", username), ("pass", password)];
 
-    // post multipart on /auth/process_login
     let response = client
         .post(format!("https://{domain}{LOGIN_PROCESS_PAGE}"))
-        .headers(headers.clone())
+        .headers(context.headers.clone())
         .form(&payload)
         .send()
         .await?;
@@ -165,33 +221,24 @@ pub async fn login(
     if !response.status().is_success() {
         if response.status() == 401 {
             error!("Invalid username or password");
-            return Err("Invalid username or password".into());
+            return Err(Box::new(LoginError::InvalidCredentials));
         }
         return Err(format!("Failed to login: {}", response.status()).into());
     }
 
-    let _headers = response.headers(); // digest the headers to get the cookies
+    let _headers = response.headers();
 
-    // get site root page for final cookies
     let response = client
         .get(format!("https://{domain}/"))
-        .headers(headers.clone())
+        .headers(context.headers.clone())
         .send()
         .await?;
     if !response.status().is_success() {
         return Err(format!("Failed to fetch site root page: {}", response.status()).into());
     }
 
-    let stop = std::time::Instant::now();
-    debug!("Logged in successfully in {:?}", stop.duration_since(start));
-
-    let _headers = response.cookies(); // digest the headers to get the cookies
-
-    if use_sessions {
-        save_session(username, &client).await?;
-    }
-
-    Ok(client)
+    let _headers = response.cookies();
+    Ok(())
 }
 
 async fn save_session(username: &str, client: &Client) -> Result<(), Box<dyn std::error::Error>> {
@@ -210,7 +257,7 @@ async fn save_session(username: &str, client: &Client) -> Result<(), Box<dyn std
     Ok(())
 }
 
-pub fn add_bypass_headers(headers: &mut HeaderMap) {
+fn add_native_bypass_headers(headers: &mut HeaderMap) {
     let own_ip_lock = crate::domain::OWN_IP.get();
     if let Some(own_ip) = own_ip_lock {
         headers.insert("CF-Connecting-IP", own_ip.parse().unwrap());

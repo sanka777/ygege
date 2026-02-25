@@ -86,15 +86,23 @@ Ygégé peut être utilisé comme indexeur personnalisé pour Jackett. Pour le m
 Une fois terminé, redémarrez Jackett et accédez aux paramètres des indexeurs. Vous devriez voir Ygégé dans la liste des indexeurs disponibles.
 
 ## Contournement Cloudflare
-Pour contourner le défi de Cloudflare, Ygégé n'utilise pas de navigateur ni de services tiers.
+Ygégé utilise désormais **Flaresolverr par défaut** pour contourner les protections Cloudflare.
 
-Une règle Cloudflare est appliquée sur le site YGG Torrent pour empêcher l'apparition du challenge Cloudflare via le cookie `account_created=true` censé garantir que l'utilisateur a un compte valide et est connecté.
+- Provider par défaut : `flaresolverr`
+- URL par défaut recommandée : `http://flaresolverr:8191`
+- Fallback possible : provider natif (basé sur [wreq](https://crates.io/crates/wreq)) si vous voulez tenter un mode sans service tiers
 
-Mais ce n'est pas si simple, Cloudflare vous surveille toujours et détecte les faux clients HTTPS et les faux navigateurs.
+### Pourquoi Flaresolverr par défaut ?
+Le challenge Cloudflare côté YGG évolue régulièrement. Le mode natif reste disponible, mais il peut échouer selon les changements de fingerprint TLS/HTTP2 ou les protections actives (ex: variations liées à HTTP/3).
 
-Pour contourner cela, Ygégé utilise la librairie [wreq](https://crates.io/crates/wreq) qui est un client HTTP basé sur `reqwest` et `tokio` permettant de reproduire 1:1 l'échange TLS et HTTP/2 avec le serveur afin de simuler un vrai navigateur.
+### Variables d'environnement associées
+```env
+ANTI_BOT_PROVIDER=flaresolverr
+FLARESOLVERR_URL=http://flaresolverr:8191
+```
 
-J'ai aussi remarqué que cela ne passait plus à partir de Chrome 133, sûrement à cause de l'integration de HTTP/3 dans Chrome qui n'est pas encore simulée par `wreq`.
+### Fallback natif éventuel
+Si Flaresolverr est indisponible, vous pouvez basculer manuellement sur le provider natif dans votre configuration (`anti_bot_provider=native`).
 
 Je recommande aux curieux [cet article](https://fingerprint.com/blog/what-is-tls-fingerprinting-transport-layer-security/) qui explique comment fonctionne le fingerprinting TLS et [cet autre article](https://www.trickster.dev/post/understanding-http2-fingerprinting/) qui explique comment fonctionne le fingerprinting HTTP/2 et comment il est possible de le contourner.
 
