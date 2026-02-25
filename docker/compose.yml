@@ -1,8 +1,30 @@
 services:
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    restart: unless-stopped
+    environment:
+      LOG_LEVEL: info
+      LOG_HTML: "false"
+      CAPTCHA_SOLVER: none
+    ports:
+      - "8191:8191"
+    healthcheck:
+      test: ["CMD-SHELL", "curl --fail http://localhost:8191/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - ygege_internal
+
   ygege:
     image: uwucode/ygege:latest
     container_name: ygege
     restart: unless-stopped
+    depends_on:
+      flaresolverr:
+        condition: service_healthy
     # Optional: Run with specific user ID (already runs as non-root UID 10001 by default)
     # user: "1000:1000"
     environment:
@@ -14,6 +36,8 @@ services:
       # TMDB_TOKEN: "your_token"               # Optional: TMDB API token
       # YGG_DOMAIN: "https://www.ygg.re"       # Optional: YGG domain
       # TURBO_ENABLED: "true"                  # Optional: Enable turbo mode
+      # ANTI_BOT_PROVIDER: "flaresolverr"      # Optional: Cloudflare bypass provider
+      # FLARESOLVERR_URL: "http://flaresolverr:8191" # Optional: Flaresolverr endpoint
     volumes:
       - ygege:/app/sessions           # Use named volume for proper permissions
       - ./ygege/config.json:/app/config.json:ro # Optional: read-only config file
@@ -25,6 +49,12 @@ services:
       timeout: 20s
       retries: 3
       start_period: 10s
+    networks:
+      - ygege_internal
+
+networks:
+  ygege_internal:
+    name: ygege_internal
 
 volumes:
   ygege:
