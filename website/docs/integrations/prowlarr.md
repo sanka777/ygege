@@ -11,6 +11,7 @@ Ygégé peut être utilisé comme indexeur personnalisé pour Prowlarr, permetta
 - Prowlarr installé et fonctionnel
 - Ygégé démarré et accessible
 - Le fichier `ygege.yml` du dépôt GitHub
+- Si `ANTI_BOT_PROVIDER=flaresolverr` (mode par défaut), un service Flaresolverr accessible (`http://flaresolverr:8191` en Docker Compose)
 
 ## Installation
 
@@ -117,8 +118,14 @@ services:
     container_name: ygege
     # ... configuration ygege
 
+  flaresolverr:
+    image: ghcr.io/flaresolverr/flaresolverr:latest
+    container_name: flaresolverr
+    # ... configuration flaresolverr
+
 # Ils sont automatiquement sur le même réseau
 # Utilisez http://ygege:8715/ dans Prowlarr
+# et FLARESOLVERR_URL=http://flaresolverr:8191 côté Ygégé
 ```
 
 ### 4. Tester la connexion
@@ -165,6 +172,7 @@ Ygégé supporte toutes les catégories YGG:
 1. Vérifiez que Ygégé est démarré: `curl http://localhost:8715/health`
 2. Vérifiez l'URL configurée dans Prowlarr
 3. Pour Docker, vérifiez que les conteneurs sont sur le même réseau
+4. Si Flaresolverr est activé, vérifiez sa disponibilité: `curl http://flaresolverr:8191/`
 
 ### Pas de résultats
 
