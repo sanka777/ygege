@@ -1,3 +1,4 @@
+mod antibot;
 mod auth;
 mod categories;
 mod config;
@@ -120,8 +121,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     *domain_lock = domain.clone();
     drop(domain_lock);
 
+    info!(
+        "[antibot] event=startup_configured strategy={} flaresolverr_url={} timeout_ms={}",
+        config.anti_bot_provider, config.flaresolverr_url, config.flaresolverr_timeout_ms
+    );
+
     std::fs::create_dir_all("sessions")?;
-    let client = login(config.username.as_str(), config.password.as_str(), true).await?;
+    let client = login(
+        config.username.as_str(),
+        config.password.as_str(),
+        true,
+        &config,
+    )
+    .await?;
     info!("Logged in to YGG with username: {}", config.username);
 
     let account = user::get_account(&client).await?;

@@ -230,7 +230,13 @@ mod tests_user {
         let config = config::load_config()?;
 
         std::fs::create_dir_all("sessions")?;
-        let client = login(config.username.as_str(), config.password.as_str(), true).await?;
+        let client = login(
+            config.username.as_str(),
+            config.password.as_str(),
+            true,
+            &config,
+        )
+        .await?;
 
         let account = get_account(&client).await?;
         println!("Account : {:?}", account);

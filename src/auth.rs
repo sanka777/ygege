@@ -1,8 +1,8 @@
+use crate::antibot::bootstrap_login;
+use crate::config::Config;
 use crate::domain::get_leaked_ip;
 use crate::resolver::AsyncDNSResolverAdapter;
-use crate::{DOMAIN, LOGIN_PAGE, LOGIN_PROCESS_PAGE};
-use std::error::Error;
-use std::fmt;
+use crate::{DOMAIN, LOGIN_PROCESS_PAGE};
 use std::fs::File;
 use std::io::Write;
 use std::net::{IpAddr, SocketAddr};
@@ -49,11 +49,12 @@ pub async fn login(
     username: &str,
     password: &str,
     use_sessions: bool,
+    config: &Config,
 ) -> Result<Client, Box<dyn std::error::Error>> {
     debug!("Logging in with username: {}", username);
 
     let emu = EmulationOption::builder()
-        .emulation(Emulation::Chrome132) // no H3 check on CF before 133
+        .emulation(Emulation::Chrome132)
         .emulation_os(EmulationOS::Windows)
         .build();
 
@@ -80,18 +81,14 @@ pub async fn login(
         )
         .build()?;
 
-    let provider = AuthProvider::Native;
-
     let start = std::time::Instant::now();
 
     if use_sessions {
-        // check if the session file exists
         let session_file = format!("sessions/{}.cookies", username);
         if std::path::Path::new(&session_file.clone()).exists() {
             debug!("Session file found: {}", session_file);
-            // load the session from the file
             let cookies = std::fs::read_to_string(&session_file)?;
-            let cookies = cookies.split(";").collect::<Vec<&str>>();
+            let cookies = cookies.split(';').collect::<Vec<&str>>();
             let cookies_len = cookies.len();
             for cookie in cookies {
                 let cookie = cookie.trim();
@@ -116,10 +113,11 @@ pub async fn login(
             debug!("Restored {} cookies from session file", cookies_len);
         }
 
-        // check if the session is still valid
+        let mut resume_headers = HeaderMap::new();
+        add_bypass_headers(&mut resume_headers);
         let response = client
             .get(format!("https://{domain}/"))
-            .headers(HeaderMap::new())
+            .headers(resume_headers)
             .send()
             .await?;
         if response.status().is_success() {
@@ -134,7 +132,6 @@ pub async fn login(
                 "Session is not valid, deleting session file (code {})",
                 response.status()
             );
-            // session is not valid, delete the file
             let _ = std::fs::remove_file(&session_file);
             debug!("Session file deleted");
         }
@@ -142,78 +139,18 @@ pub async fn login(
 
     client.clear_cookies();
 
-    let context = prepare_antibot_context(&client, domain, provider).await?;
-    perform_login_with_context(&client, domain, username, password, &context).await?;
-
-    let stop = std::time::Instant::now();
-    debug!("Logged in successfully in {:?}", stop.duration_since(start));
-
-    if use_sessions {
-        save_session(username, &client).await?;
-    }
-
-    Ok(client)
-}
-
-pub async fn prepare_antibot_context(
-    client: &Client,
-    domain: &str,
-    provider: AuthProvider,
-) -> Result<AntibotContext, Box<dyn std::error::Error>> {
-    let mut headers = HeaderMap::new();
-
-    match provider {
-        AuthProvider::Native => {
-            add_native_bypass_headers(&mut headers);
-
-            let url = Url::parse(format!("https://{domain}/").as_str())?;
-            let cookie = wreq::cookie::CookieBuilder::new("account_created", "true")
-                .domain(domain)
-                .path("/")
-                .http_only(true)
-                .secure(true)
-                .build();
-            client.set_cookie(&url, cookie);
-
-            let response = client
-                .get(format!("https://{domain}{LOGIN_PAGE}"))
-                .headers(headers.clone())
-                .send()
-                .await?;
-
-            if !response.status().is_success() {
-                return Err(Box::new(LoginError::AntibotUnavailable));
-            }
-            let _headers = response.headers();
-        }
-    }
-
-    Ok(AntibotContext { headers })
-}
-
-pub async fn perform_login_with_context(
-    client: &Client,
-    domain: &str,
-    username: &str,
-    password: &str,
-    context: &AntibotContext,
-) -> Result<(), Box<dyn std::error::Error>> {
-    let url = Url::parse(format!("https://{domain}/").as_str())?;
-    let cookie_header = client
-        .get_cookies(&url)
-        .and_then(|h| h.to_str().ok().map(|value| value.to_string()));
-    let has_ygg_cookie = cookie_header
-        .as_deref()
-        .is_some_and(|cookies| cookies.contains("ygg_="));
-    if !has_ygg_cookie {
-        return Err(Box::new(LoginError::ChallengeNotSolved));
-    }
+    let antibot_bootstrap = bootstrap_login(config, domain, &client).await?;
+    info!(
+        "[antibot] event=login_bootstrap_completed strategy={} username={}",
+        antibot_bootstrap.provider.as_str(),
+        username
+    );
 
     let payload = [("id", username), ("pass", password)];
 
     let response = client
         .post(format!("https://{domain}{LOGIN_PROCESS_PAGE}"))
-        .headers(context.headers.clone())
+        .headers(antibot_bootstrap.headers.clone())
         .form(&payload)
         .send()
         .await?;
@@ -226,23 +163,26 @@ pub async fn perform_login_with_context(
         return Err(format!("Failed to login: {}", response.status()).into());
     }
 
-    let _headers = response.headers();
-
     let response = client
         .get(format!("https://{domain}/"))
-        .headers(context.headers.clone())
+        .headers(antibot_bootstrap.headers)
         .send()
         .await?;
     if !response.status().is_success() {
         return Err(format!("Failed to fetch site root page: {}", response.status()).into());
     }
 
-    let _headers = response.cookies();
-    Ok(())
+    let stop = std::time::Instant::now();
+    debug!("Logged in successfully in {:?}", stop.duration_since(start));
+
+    if use_sessions {
+        save_session(username, &client).await?;
+    }
+
+    Ok(client)
 }
 
 async fn save_session(username: &str, client: &Client) -> Result<(), Box<dyn std::error::Error>> {
-    // save the session in a file
     let mut file = File::create(format!("sessions/{}.cookies", username))?;
     let cookies_header = client
         .get_cookies(&Url::parse(
