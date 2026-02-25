@@ -87,6 +87,19 @@ fn load_config_from_env() -> Result<Config, std::io::Error> {
 
     let tmdb_token = std::env::var("TMDB_TOKEN").ok();
     let ygg_domain = std::env::var("YGG_DOMAIN").ok();
+    let anti_bot_provider =
+        std::env::var("ANTI_BOT_PROVIDER").unwrap_or("flaresolverr".to_string());
+    let flaresolverr_url =
+        std::env::var("FLARESOLVERR_URL").unwrap_or("http://flaresolverr:8191".to_string());
+    let flaresolverr_timeout_ms = std::env::var("FLARESOLVERR_TIMEOUT_MS")
+        .unwrap_or("60000".to_string())
+        .parse::<u64>()
+        .map_err(|_| {
+            std::io::Error::new(
+                std::io::ErrorKind::InvalidInput,
+                "FLARESOLVERR_TIMEOUT_MS must be a positive integer",
+            )
+        })?;
 
     Ok(Config {
         username,
@@ -97,6 +110,9 @@ fn load_config_from_env() -> Result<Config, std::io::Error> {
         tmdb_token,
         ygg_domain,
         turbo_enabled,
+        anti_bot_provider,
+        flaresolverr_url,
+        flaresolverr_timeout_ms,
     })
 }
 
@@ -111,6 +127,9 @@ pub struct Config {
     pub tmdb_token: Option<String>,
     pub ygg_domain: Option<String>,
     pub turbo_enabled: Option<bool>,
+    pub anti_bot_provider: String,
+    pub flaresolverr_url: String,
+    pub flaresolverr_timeout_ms: u64,
 }
 
 impl Default for Config {
@@ -124,6 +143,9 @@ impl Default for Config {
             tmdb_token: None,
             ygg_domain: None,
             turbo_enabled: None,
+            anti_bot_provider: "flaresolverr".to_string(),
+            flaresolverr_url: "http://flaresolverr:8191".to_string(),
+            flaresolverr_timeout_ms: 60000,
         }
     }
 }

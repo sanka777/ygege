@@ -97,6 +97,7 @@ async fn batch_best_search(
                         config.username.as_str(),
                         config.password.as_str(),
                         true,
+                        config,
                     )
                     .await?;
 
@@ -196,6 +197,7 @@ async fn batch_category_search(
                         config.username.as_str(),
                         config.password.as_str(),
                         true,
+                        config,
                     )
                     .await?;
 
@@ -433,9 +435,13 @@ pub async fn ygg_search(
             // If session expired and NOT using custom cookies, try to renew
             if e.to_string().contains("Session expired") && !data.is_custom {
                 info!("Trying to renew session...");
-                let new_client =
-                    crate::auth::login(config.username.as_str(), config.password.as_str(), true)
-                        .await?;
+                let new_client = crate::auth::login(
+                    config.username.as_str(),
+                    config.password.as_str(),
+                    true,
+                    &config,
+                )
+                .await?;
 
                 // Copy cookies from new client to shared client
                 let domain = crate::DOMAIN.lock()?;

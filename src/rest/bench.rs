@@ -121,7 +121,8 @@ pub async fn bench_mark(
             let _login = login(
                 config.username.as_str(),
                 config.password.as_str(),
-                false
+                false,
+                &config
             ).await;
             let duration = chrono::Utc::now().signed_duration_since(start);
             let line = format!("{},{},{}\n",
@@ -139,7 +140,8 @@ pub async fn bench_mark(
             let _login = login(
                 config.username.as_str(),
                 config.password.as_str(),
-                true
+                true,
+                &config
             ).await;
             let duration = chrono::Utc::now().signed_duration_since(start);
             let line = format!("{},{},{}\n",
