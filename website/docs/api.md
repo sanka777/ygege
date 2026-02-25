@@ -10,7 +10,7 @@ Cette page documente tous les endpoints de l'API Ygégé.
 ## Base URL
 
 ```
-http://localhost:8715
+http://localhost:9876
 ```
 
 ## Authentification
@@ -79,22 +79,22 @@ Recherche des torrents avec filtres avancés.
 
 **Recherche simple:**
 ```bash
-curl "http://localhost:8715/search?q=vaiana+2"
+curl "http://localhost:9876/search?q=vaiana+2"
 ```
 
 **Recherche avancée:**
 ```bash
-curl "http://localhost:8715/search?q=vaiana+2&sort=seed&order=descending&category=2178"
+curl "http://localhost:9876/search?q=vaiana+2&sort=seed&order=descending&category=2178"
 ```
 
 **Recherche par IMDB:**
 ```bash
-curl "http://localhost:8715/search?imdbid=tt10298810"
+curl "http://localhost:9876/search?imdbid=tt10298810"
 ```
 
 **Recherche série (saison/épisode):**
 ```bash
-curl "http://localhost:8715/search?q=breaking+bad&season=1&ep=1"
+curl "http://localhost:9876/search?q=breaking+bad&season=1&ep=1"
 ```
 
 #### Réponse
@@ -137,7 +137,7 @@ Liste toutes les catégories et sous-catégories disponibles.
 #### Exemple
 
 ```bash
-curl "http://localhost:8715/categories"
+curl "http://localhost:9876/categories"
 ```
 
 #### Réponse
@@ -178,7 +178,7 @@ Obtenir les informations détaillées d'un torrent spécifique.
 #### Exemple
 
 ```bash
-curl "http://localhost:8715/torrent/info?id=1234567"
+curl "http://localhost:9876/torrent/info?id=1234567"
 ```
 
 #### Réponse
@@ -218,7 +218,7 @@ Liste tous les fichiers contenus dans un torrent.
 #### Exemple
 
 ```bash
-curl "http://localhost:8715/torrent/1234567/files"
+curl "http://localhost:9876/torrent/1234567/files"
 ```
 
 #### Réponse
@@ -253,7 +253,7 @@ Télécharge le fichier .torrent.
 #### Exemple
 
 ```bash
-curl -O "http://localhost:8715/download?id=1234567"
+curl -O "http://localhost:9876/download?id=1234567"
 ```
 
 #### Réponse
@@ -271,7 +271,7 @@ Obtenir les informations du compte YGG connecté.
 #### Exemple
 
 ```bash
-curl "http://localhost:8715/user"
+curl "http://localhost:9876/user"
 ```
 
 #### Réponse
@@ -298,7 +298,7 @@ Vérifie que le service est opérationnel.
 #### Exemple
 
 ```bash
-curl "http://localhost:8715/health"
+curl "http://localhost:9876/health"
 ```
 
 #### Réponse
@@ -325,7 +325,7 @@ Obtenir le statut détaillé du service et l'état de santé de tous les composa
 #### Exemple
 
 ```bash
-curl "http://localhost:8715/status"
+curl "http://localhost:9876/status"
 ```
 
 #### Réponse
@@ -399,13 +399,13 @@ Si vous êtes rate-limité par YGG, vérifiez que vos identifiants sont correcte
 
 ```bash
 # 1. Rechercher
-results=$(curl -s "http://localhost:8715/search?q=vaiana+2")
+results=$(curl -s "http://localhost:9876/search?q=vaiana+2")
 
 # 2. Extraire le premier ID
 torrent_id=$(echo $results | jq -r '.[0].id')
 
 # 3. Télécharger
-curl -O "http://localhost:8715/download?id=$torrent_id"
+curl -O "http://localhost:9876/download?id=$torrent_id"
 ```
 
 ### Avec Python
@@ -414,7 +414,7 @@ curl -O "http://localhost:8715/download?id=$torrent_id"
 import requests
 
 # Configuration
-BASE_URL = "http://localhost:8715"
+BASE_URL = "http://localhost:9876"
 
 # Recherche
 response = requests.get(f"{BASE_URL}/search", params={"q": "vaiana 2"})

@@ -55,7 +55,7 @@ Ygégé can be used as a custom indexer for Prowlarr. To set it up, find your Ap
 Once it's done, restart Prowlarr and go to the indexer settings, you should see Ygégé in the list of available indexers.
 
 > [!NOTE]
-> Prowlarr doesn't allow custom "Base URL". By default the URL is `http://localhost:8715/`. For Docker Compose setups, use `http://ygege:8715/`. Alternatively, use ygege-dns-redirect.local with custom DNS or hosts file redirection.
+> Prowlarr doesn't allow custom "Base URL". By default the URL is `http://localhost:9876/`. For Docker Compose setups, use `http://ygege:9876/`. Alternatively, use ygege-dns-redirect.local with custom DNS or hosts file redirection.
 
 ## Jackett Integration
 

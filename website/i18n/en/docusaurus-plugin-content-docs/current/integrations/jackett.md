@@ -94,7 +94,7 @@ In the configuration window, enter:
 
 | Parameter | Value | Description |
 |-----------|-------|-------------|
-| **Indexer URL** | `http://localhost:8715` | Ygégé base URL |
+| **Indexer URL** | `http://localhost:9876` | Ygégé base URL |
 | **Username** | Your YGG username | Optional (if not in config) |
 | **Password** | Your YGG password | Optional (if not in config) |
 
@@ -129,14 +129,14 @@ services:
     volumes:
       - ./config:/config
     ports:
-      - "8715:8715"
+      - "9876:9876"
     environment:
       YGG_USERNAME: "your_username"
       YGG_PASSWORD: "your_password"
     restart: unless-stopped
 ```
 
-In this case, use `http://ygege:8715` as the URL in Jackett configuration.
+In this case, use `http://ygege:9876` as the URL in Jackett configuration.
 
 ## Usage
 
@@ -201,7 +201,7 @@ tt0903747
 **Solution:**
 1. Verify Ygégé is running:
    ```bash
-   curl http://localhost:8715/health
+   curl http://localhost:9876/health
    ```
 2. Check the configured URL (localhost vs container name)
 3. For Docker, verify containers are on the same network
@@ -211,7 +211,7 @@ tt0903747
 **Solution:**
 1. Test Ygégé API directly:
    ```bash
-   curl "http://localhost:8715/api/search?q=test"
+   curl "http://localhost:9876/api/search?q=test"
    ```
 2. Check Ygégé logs:
    ```bash
