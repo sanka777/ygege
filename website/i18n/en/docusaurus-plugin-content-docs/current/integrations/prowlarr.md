@@ -91,15 +91,15 @@ systemctl restart prowlarr
 |-----------|-------|-------------|
 | **Name** | Ygégé | Indexer name |
 | **Enable** | ✅ | Enable the indexer |
-| **URL** | `http://localhost:8715/` | Base URL |
+| **URL** | `http://localhost:9876/` | Base URL |
 | **API Path** | `/api` | API path |
 | **Categories** | All | Categories to index |
 
 :::warning Important Base URL
 Prowlarr does **not** allow customizing the base URL. Use:
-- **Local installation**: `http://localhost:8715/`
-- **Docker Compose**: `http://ygege:8715/` (service name)
-- **Custom DNS**: `http://ygege-dns-redirect.local:8715/`
+- **Local installation**: `http://localhost:9876/`
+- **Docker Compose**: `http://ygege:9876/` (service name)
+- **Custom DNS**: `http://ygege-dns-redirect.local:9876/`
 :::
 
 ### 3. Docker Compose Configuration
@@ -119,7 +119,7 @@ services:
     # ... ygege configuration
 
 # They're automatically on the same network
-# Use http://ygege:8715/ in Prowlarr
+# Use http://ygege:9876/ in Prowlarr
 ```
 
 ### 4. Test the Connection
@@ -163,7 +163,7 @@ Ygégé supports all YGG categories:
 
 ### Connection Error
 
-1. Verify that Ygégé is running: `curl http://localhost:8715/health`
+1. Verify that Ygégé is running: `curl http://localhost:9876/health`
 2. Check the URL configured in Prowlarr
 3. For Docker, verify containers are on the same network
 4. If Flaresolverr is enabled, verify it is reachable: `curl http://flaresolverr:8191/`
@@ -172,7 +172,7 @@ Ygégé supports all YGG categories:
 
 1. Check Ygégé logs: `docker logs ygege`
 2. Verify your YGG credentials are valid
-3. Test the API directly: `curl http://localhost:8715/api/search?q=test`
+3. Test the API directly: `curl http://localhost:9876/api/search?q=test`
 
 ## Next Steps
 

@@ -18,7 +18,7 @@ Le fichier de configuration principal est `config.json`. Il doit être placé da
     "username": "votre_nom_utilisateur_ygg",
     "password": "votre_mot_de_passe",
     "bind_ip": "0.0.0.0",
-    "bind_port": 8715,
+    "bind_port": 9876,
     "log_level": "debug",
     "tmdb_token": null,
     "ygg_domain": null,
@@ -46,17 +46,17 @@ YGG Torrent est un tracker privé. Des identifiants valides sont **obligatoires*
 | Paramètre | Type | Défaut | Description |
 |-----------|------|--------|-------------|
 | `bind_ip` | string | `0.0.0.0` | Adresse IP d'écoute |
-| `bind_port` | number | `8715` | Port d'écoute du serveur |
+| `bind_port` | number | `9876` | Port d'écoute du serveur |
 
 :::tip Personnaliser le port
 Pour éviter les conflits de ports (ex: sur Windows), changez simplement `BIND_PORT` :
 ```yaml
 environment:
-  BIND_PORT: "3000"  # Utilise le port 3000 au lieu de 8715
+  BIND_PORT: "3000"  # Utilise le port 3000 au lieu de 9876
 ports:
   - "3000:3000"
 ```
-Le healthcheck s'adapte automatiquement grâce à `$${BIND_PORT:-8715}`.
+Le healthcheck s'adapte automatiquement grâce à `$${BIND_PORT:-9876}`.
 :::
 
 ### Logging
@@ -147,7 +147,7 @@ services:
       flaresolverr:
         condition: service_healthy
     ports:
-      - "8715:8715"
+      - "9876:9876"
     volumes:
       - ./config:/config
     environment:
@@ -168,7 +168,7 @@ services:
     "username": "mon_username",
     "password": "mon_password",
     "bind_ip": "0.0.0.0",
-    "bind_port": 8715,
+    "bind_port": 9876,
     "log_level": "debug",
     "tmdb_token": "votre_token_tmdb",
     "ygg_domain": null,
@@ -209,7 +209,7 @@ Vous devriez voir:
 [INFO] Configuration chargée avec succès
 [INFO] Connexion à YGG Torrent...
 [INFO] Authentification réussie
-[INFO] Serveur démarré sur 0.0.0.0:8715
+[INFO] Serveur démarré sur 0.0.0.0:9876
 ```
 
 ## Prochaines étapes

@@ -10,7 +10,7 @@ This page documents all Ygégé API endpoints.
 ## Base URL
 
 ```
-http://localhost:8715
+http://localhost:9876
 ```
 
 ## Authentication
@@ -79,22 +79,22 @@ Search for torrents with advanced filters.
 
 **Simple search:**
 ```bash
-curl "http://localhost:8715/search?q=moana+2"
+curl "http://localhost:9876/search?q=moana+2"
 ```
 
 **Advanced search:**
 ```bash
-curl "http://localhost:8715/search?q=moana+2&sort=seed&order=descending&category=2178"
+curl "http://localhost:9876/search?q=moana+2&sort=seed&order=descending&category=2178"
 ```
 
 **Search by IMDB:**
 ```bash
-curl "http://localhost:8715/search?imdbid=tt10298810"
+curl "http://localhost:9876/search?imdbid=tt10298810"
 ```
 
 **Series search (season/episode):**
 ```bash
-curl "http://localhost:8715/search?q=breaking+bad&season=1&ep=1"
+curl "http://localhost:9876/search?q=breaking+bad&season=1&ep=1"
 ```
 
 #### Response
@@ -137,7 +137,7 @@ List all available categories and subcategories.
 #### Example
 
 ```bash
-curl "http://localhost:8715/categories"
+curl "http://localhost:9876/categories"
 ```
 
 #### Response
@@ -178,7 +178,7 @@ Get detailed information about a specific torrent.
 #### Example
 
 ```bash
-curl "http://localhost:8715/torrent/info?id=1234567"
+curl "http://localhost:9876/torrent/info?id=1234567"
 ```
 
 #### Response
@@ -218,7 +218,7 @@ List all files contained in a torrent.
 #### Example
 
 ```bash
-curl "http://localhost:8715/torrent/1234567/files"
+curl "http://localhost:9876/torrent/1234567/files"
 ```
 
 #### Response
@@ -253,7 +253,7 @@ Download the .torrent file.
 #### Example
 
 ```bash
-curl -O "http://localhost:8715/download?id=1234567"
+curl -O "http://localhost:9876/download?id=1234567"
 ```
 
 #### Response
@@ -271,7 +271,7 @@ Get information about the connected YGG account.
 #### Example
 
 ```bash
-curl "http://localhost:8715/user"
+curl "http://localhost:9876/user"
 ```
 
 #### Response
@@ -298,7 +298,7 @@ Check if the service is operational.
 #### Example
 
 ```bash
-curl "http://localhost:8715/health"
+curl "http://localhost:9876/health"
 ```
 
 #### Response
@@ -325,7 +325,7 @@ Get detailed service status and health state of all components.
 #### Example
 
 ```bash
-curl "http://localhost:8715/status"
+curl "http://localhost:9876/status"
 ```
 
 #### Response
@@ -399,13 +399,13 @@ If you're being rate-limited by YGG, verify that your credentials are correctly 
 
 ```bash
 # 1. Search
-results=$(curl -s "http://localhost:8715/search?q=moana+2")
+results=$(curl -s "http://localhost:9876/search?q=moana+2")
 
 # 2. Extract first ID
 torrent_id=$(echo $results | jq -r '.[0].id')
 
 # 3. Download
-curl -O "http://localhost:8715/download?id=$torrent_id"
+curl -O "http://localhost:9876/download?id=$torrent_id"
 ```
 
 ### With Python
@@ -414,7 +414,7 @@ curl -O "http://localhost:8715/download?id=$torrent_id"
 import requests
 
 # Configuration
-BASE_URL = "http://localhost:8715"
+BASE_URL = "http://localhost:9876"
 
 # Search
 response = requests.get(f"{BASE_URL}/search", params={"q": "moana 2"})

@@ -60,7 +60,7 @@ services:
     container_name: ygege
     restart: unless-stopped
     ports:
-      - "8715:8715"
+      - "9876:9876"
     volumes:
       - ./config:/config
     environment:
@@ -71,11 +71,11 @@ services:
       # Configuration optionnelle
       LOG_LEVEL: "debug"
       BIND_IP: "0.0.0.0"
-      BIND_PORT: "8715"
+      BIND_PORT: "9876"
     
     # Health check pour vérifier le bon fonctionnement
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8715/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9876/health || exit 1"]
       interval: 1m30s
       timeout: 10s
       retries: 3
@@ -95,7 +95,7 @@ docker compose up -d
 docker compose logs -f ygege
 
 # Tester l'API
-curl http://localhost:8715/health
+curl http://localhost:9876/health
 ```
 
 Vous devriez voir :
@@ -103,10 +103,10 @@ Vous devriez voir :
 [INFO] Configuration chargée avec succès
 [INFO] Connexion à YGG Torrent...
 [INFO] Authentification réussie
-[INFO] Serveur démarré sur 0.0.0.0:8715
+[INFO] Serveur démarré sur 0.0.0.0:9876
 ```
 
-Vous pouvez également accéder à la page d'informations dans votre navigateur : `http://localhost:8715/`
+Vous pouvez également accéder à la page d'informations dans votre navigateur : `http://localhost:9876/`
 
 ![Page d'informations Ygégé](/img/ygege-info.png)
 
@@ -141,18 +141,18 @@ environment:
     "username": "votre_nom_utilisateur",
     "password": "votre_mot_de_passe",
     "bind_ip": "0.0.0.0",
-    "bind_port": 8715,
+    "bind_port": 9876,
     "log_level": "debug"
 }
 ```
 
 ### Ports réseau
 
-Par défaut, Ygégé écoute sur le port **8715**. Si ce port est déjà utilisé :
+Par défaut, Ygégé écoute sur le port **9876**. Si ce port est déjà utilisé :
 
 ```yaml
 ports:
-  - "9090:8715"  # Utilise le port 9090 sur votre machine
+  - "9090:9876"  # Utilise le port 9090 sur votre machine
 ```
 
 Ou modifiez le port dans la configuration :
@@ -195,10 +195,10 @@ Vous pouvez aussi utiliser l'API REST directement :
 
 ```bash
 # Rechercher un torrent
-curl "http://localhost:8715/search?q=breaking+bad&season=1&ep=1"
+curl "http://localhost:9876/search?q=breaking+bad&season=1&ep=1"
 
 # Télécharger un torrent
-curl -O "http://localhost:8715/download?id=1234567"
+curl -O "http://localhost:9876/download?id=1234567"
 ```
 
 👉 [Documentation API complète](./api)
@@ -212,13 +212,13 @@ curl -O "http://localhost:8715/download?id=1234567"
    docker compose logs ygege
    ```
 
-2. Vérifiez que le port 8715 est libre :
+2. Vérifiez que le port 9876 est libre :
    ```bash
    # Linux/Mac
-   lsof -i :8715
+   lsof -i :9876
    
    # Windows
-   netstat -ano | findstr :8715
+   netstat -ano | findstr :9876
    ```
 
 ### Erreur d'authentification YGG
@@ -255,7 +255,7 @@ Le service n'est pas accessible :
 
 3. Testez depuis le conteneur lui-même :
    ```bash
-   docker exec ygege curl http://localhost:8715/health
+   docker exec ygege curl http://localhost:9876/health
    ```
 
 ## Mises à jour
@@ -319,7 +319,7 @@ sudo systemctl start ygege
 ### Vérifier la version installée
 
 ```bash
-curl http://localhost:8715/status | jq '.version'
+curl http://localhost:9876/status | jq '.version'
 ```
 
 ## Prochaines étapes

@@ -18,7 +18,7 @@ The main configuration file is `config.json`. It should be placed in the `/confi
     "username": "your_ygg_username",
     "password": "your_password",
     "bind_ip": "0.0.0.0",
-    "bind_port": 8715,
+    "bind_port": 9876,
     "log_level": "debug",
     "tmdb_token": null,
     "ygg_domain": null,
@@ -46,17 +46,17 @@ Without valid credentials, you will be **rate-limited** by YGG and the service w
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
 | `bind_ip` | string | `0.0.0.0` | Listening IP address |
-| `bind_port` | number | `8715` | Server listening port |
+| `bind_port` | number | `9876` | Server listening port |
 
 :::tip Custom Port
 To avoid port conflicts (e.g., on Windows), simply change `BIND_PORT`:
 ```yaml
 environment:
-  BIND_PORT: "3000"  # Use port 3000 instead of 8715
+  BIND_PORT: "3000"  # Use port 3000 instead of 9876
 ports:
   - "3000:3000"
 ```
-The healthcheck automatically adapts using `$${BIND_PORT:-8715}`.
+The healthcheck automatically adapts using `$${BIND_PORT:-9876}`.
 :::
 
 ### Logging
@@ -140,7 +140,7 @@ services:
       flaresolverr:
         condition: service_healthy
     ports:
-      - "8715:8715"
+      - "9876:9876"
     volumes:
       - ./config:/config
     environment:
@@ -161,7 +161,7 @@ services:
     "username": "my_username",
     "password": "my_password",
     "bind_ip": "0.0.0.0",
-    "bind_port": 8715,
+    "bind_port": 9876,
     "log_level": "debug",
     "tmdb_token": "your_tmdb_token",
     "ygg_domain": null,
@@ -202,7 +202,7 @@ You should see:
 [INFO] Configuration loaded successfully
 [INFO] Connecting to YGG Torrent...
 [INFO] Authentication successful
-[INFO] Server started on 0.0.0.0:8715
+[INFO] Server started on 0.0.0.0:9876
 ```
 
 ## Next Steps

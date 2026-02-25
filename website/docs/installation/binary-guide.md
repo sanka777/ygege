@@ -68,7 +68,7 @@ Créez un fichier `config.json` dans le même dossier que le binaire :
   "username": "votre_nom_utilisateur_ygg",
   "password": "votre_mot_de_passe",
   "bind_ip": "0.0.0.0",
-  "bind_port": 8715,
+  "bind_port": 9876,
   "log_level": "debug",
   "tmdb_token": null
 }
@@ -85,7 +85,7 @@ Vous pouvez aussi utiliser des variables d'environnement :
 ```bash
 export YGG_USERNAME="votre_nom_utilisateur"
 export YGG_PASSWORD="votre_mot_de_passe"
-export BIND_PORT="8715"
+export BIND_PORT="9876"
 export LOG_LEVEL="debug"
 ```
 
@@ -101,7 +101,7 @@ export LOG_LEVEL="debug"
 .\ygege.exe
 ```
 
-Le serveur démarre sur `http://localhost:8715`
+Le serveur démarre sur `http://localhost:9876`
 
 ### Lancement en arrière-plan (Linux/macOS)
 
@@ -189,7 +189,7 @@ echo "Mise à jour terminée vers $LATEST"
 Testez que le service fonctionne :
 
 ```bash
-curl http://localhost:8715/health
+curl http://localhost:9876/health
 ```
 
 Réponse attendue :
@@ -199,7 +199,7 @@ OK
 
 Pour un statut détaillé :
 ```bash
-curl http://localhost:8715/status
+curl http://localhost:9876/status
 ```
 
 Réponse :
